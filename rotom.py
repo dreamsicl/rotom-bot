@@ -1,6 +1,20 @@
 import discord
 from discord.ext import commands
 import random
+import urllib.request
+import json
+import logging
+
+logging.basicConfig(level=logging.INFO)
+pokeapi = "https://pokeapi.co/api/v2/"
+
+def getJSON(url):
+    logging.info("getJSON(): currURL %s" % url)
+    response = urllib.request.urlopen(url)
+    data = response.read()
+    data = "".join(map(chr, data))
+    data = json.loads(data)
+    return data
 
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
@@ -59,5 +73,13 @@ async def cool(ctx):
 async def _bot():
     """Is the bot cool?"""
     await bot.say('Yes, the bot is cool.')
+
+@bot.command()
+async def move(name : str):
+    """ Pokemon move description """
+    move = getJSON(pokeapi + "/moves/" + name)
+    logging.info(move)
+    await bot.say("getting " + name)
+
 
 bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
