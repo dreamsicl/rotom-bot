@@ -1,68 +1,63 @@
-from disco.bot import Plugin
+import discord
+from discord.ext import commands
+import random
 
+description = '''An example bot to showcase the discord.ext.commands extension
+module.
+There are a number of utility commands being showcased here.'''
+bot = commands.Bot(command_prefix='!', description=description)
 
-class BasicPlugin(Plugin):
-    @Plugin.command('reload')
-    def on_reload(self, event):
-        self.reload()
-        event.msg.reply('Reloaded!')
+@bot.event
+async def on_ready():
+    print('Logged in as')
+    print(bot.user.name)
+    print(bot.user.id)
+    print('------')
 
-    @Plugin.listen('MessageCreate')
-    def on_message_create(self, msg):
-        self.log.info('Message created: {}: {}'.format(msg.author, msg.content))
+@bot.command()
+async def add(left : int, right : int):
+    """Adds two numbers together."""
+    await bot.say(left + right)
 
-    @Plugin.command('echo', '<content:str...>')
-    def on_test_command(self, event, content):
-        event.msg.reply(content)
+@bot.command()
+async def roll(dice : str):
+    """Rolls a dice in NdN format."""
+    try:
+        rolls, limit = map(int, dice.split('d'))
+    except Exception:
+        await bot.say('Format has to be in NdN!')
+        return
 
-    @Plugin.command('spam', '<count:int> <content:str...>')
-    def on_spam_command(self, event, count, content):
-        for i in range(count):
-            event.msg.reply(content)
+    result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+    await bot.say(result)
 
-    @Plugin.command('count', group='messages')
-    def on_stats(self, event):
-        msg = event.msg.reply('Ok, one moment...')
-        msg_count = 0
+@bot.command(description='For when you wanna settle the score some other way')
+async def choose(*choices : str):
+    """Chooses between multiple choices."""
+    await bot.say(random.choice(choices))
 
-        for msgs in event.channel.messages_iter(bulk=True):
-            msg_count += len(msgs)
+@bot.command()
+async def repeat(times : int, content='repeating...'):
+    """Repeats a message multiple times."""
+    for i in range(times):
+        await bot.say(content)
 
-        msg.edit('{} messages'.format(msg_count))
+@bot.command()
+async def joined(member : discord.Member):
+    """Says when a member joined."""
+    await bot.say('{0.name} joined in {0.joined_at}'.format(member))
 
-    @Plugin.command('tag', '<name:str> [value:str...]')
-    def on_tag(self, event, name, value=None):
-        tags = self.storage.guild.ensure('tags')
+@bot.group(pass_context=True)
+async def cool(ctx):
+    """Says if a user is cool.
+    In reality this just checks if a subcommand is being invoked.
+    """
+    if ctx.invoked_subcommand is None:
+        await bot.say('No, {0.subcommand_passed} is not cool'.format(ctx))
 
-        if value:
-            tags[name] = value
-            event.msg.reply(':ok_hand:')
-        else:
-            if name in tags:
-                return event.msg.reply(tags[name])
-            else:
-                return event.msg.reply('Unknown tag: `{}`'.format(name))
+@cool.command(name='bot')
+async def _bot():
+    """Is the bot cool?"""
+    await bot.say('Yes, the bot is cool.')
 
-    @Plugin.command('info', '<query:str...>')
-    def on_info(self, event, query):
-        users = list(self.state.users.select({'username': query}, {'id': query}))
-
-        if not users:
-            event.msg.reply("Couldn't find user for your query: `{}`".format(query))
-        elif len(users) > 1:
-            event.msg.reply('I found too many userse ({}) for your query: `{}`'.format(len(users), query))
-        else:
-            user = users[0]
-            parts = []
-            parts.append('ID: {}'.format(user.id))
-            parts.append('Username: {}'.format(user.username))
-            parts.append('Discriminator: {}'.format(user.discriminator))
-
-            if event.channel.guild:
-                member = event.channel.guild.get_member(user)
-                parts.append('Nickname: {}'.format(member.nick))
-                parts.append('Joined At: {}'.format(member.joined_at))
-
-            event.msg.reply('```\n{}\n```'.format(
-                '\n'.join(parts)
-            ))
+bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
