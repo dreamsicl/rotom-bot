@@ -3,19 +3,32 @@ from discord.ext import commands
 import random
 import urllib.request
 import json
+import pprint
 import logging
 
 logging.basicConfig(level=logging.INFO)
-pokeapi = "https://pokeapi.co/api/v2/"
+pp = pprint.PrettyPrinter(indent=2)
+
+### grab info from pokeapi
+pokeapi = "http://pokeapi.co/api/v2/"
 
 def getJSON(url):
-    logging.info("getJSON(): currURL %s" % url)
-    response = urllib.request.urlopen(url)
+    logging.info("getJSON(): currURL=%s" % url)
+
+    # init request to pokeapi, set headers
+    req = urllib.request.Request(url,
+                                 data=None,
+                                 headers={'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
+                                 })
+    response = urllib.request.urlopen(req)
+
     data = response.read()
     data = "".join(map(chr, data))
     data = json.loads(data)
     return data
 
+
+### begin bot commands
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
 There are a number of utility commands being showcased here.'''
@@ -77,8 +90,9 @@ async def _bot():
 @bot.command()
 async def move(name : str):
     """ Pokemon move description """
-    move = getJSON(pokeapi + "/moves/" + name)
-    logging.info(move)
+    move = getJSON(pokeapi + "move/" + name)
+    pp.pprint(move)
+
     await bot.say("getting " + name)
 
 
