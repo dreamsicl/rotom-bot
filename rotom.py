@@ -106,79 +106,89 @@ async def move(*, name: str):
     name = name.strip().lower().replace(" ", "-")
     move = getJSON(pokeapi + "move/" + name)
 
-    # remove unnecessary keys for easier debugging
-    # del move["flavor_text_entries"]
-    # del move["names"]
+    if move:
+        move['name'] = [name['name'] for name in move['names'] if name['language']['name'] == "en"][0]
 
-    # pp.pprint(move['names'])
-    move['name'] = [name['name'] for name in move['names'] if name['language']['name'] == "en"][0]
+        flavor_text = [text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"][0]
 
-    flavor_text = [text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"][0]
+        say_move = "**MOVE: " + move["name"].upper() + "**" + \
+            "\n\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
+            "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
+            "`\n\n__Description:__ `" + flavor_text + "`"
 
-    say_move = "**MOVE: " + move["name"].upper() + "**" + \
-        "\n\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
-        "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
-        "`\n\n__Description:__ `" + flavor_text + "`"
+    else: 
+        say_move = "Couldn't' find " + move + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
 
     await bot.say(say_move)
 
 @bot.command()
 async def ttype(ttype: str):
-    ttype = ttype.strip().lower()
-    ttype = getJSON(pokeapi + "type/" + ttype)
 
-    delimiter = "`, `"
-    super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
-    weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
-    resist = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_from']])
-    not_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_to']])
-    no_dmg_to = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_to']])
-    no_dmg_from = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_from']])
+    ttype = getJSON(pokeapi + "type/" + ttype.strip().lower())
 
-    say_type = "**TYPE: " + ttype["name"].upper() + "**\n\n"
-    if super_on:
-        say_type += "Super Effective on: `" + super_on + "`\n"
-    if not_on:
-        say_type += "Not Very Effective on: `" + not_on + "`\n"
-    if resist:
-        say_type += "Resists: `" + resist + "`\n"
-    if weak:
-        say_type += "Weak to: `" + weak + "`\n"
-    if no_dmg_from:
-        say_type += "No damage from: `" + no_dmg_from + "`\n"
-    if no_dmg_to:
-        say_type += "No damage to: `" + no_dmg_to + "`\n"
+    if ttype:
+        delimiter = "`, `"
+        super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
+        weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
+        resist = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_from']])
+        not_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_to']])
+        no_dmg_to = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_to']])
+        no_dmg_from = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_from']])
+
+        say_type = "**TYPE: " + ttype["name"].upper() + "**\n\n"
+        if super_on:
+            say_type += "Super Effective on: `" + super_on + "`\n"
+        if not_on:
+            say_type += "Not Very Effective on: `" + not_on + "`\n"
+        if resist:
+            say_type += "Resists: `" + resist + "`\n"
+        if weak:
+            say_type += "Weak to: `" + weak + "`\n"
+        if no_dmg_from:
+            say_type += "No damage from: `" + no_dmg_from + "`\n"
+        if no_dmg_to:
+            say_type += "No damage to: `" + no_dmg_to + "`\n"
     
+    else:
+        say_type = "Couldn't' find " + ttype + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+
     await bot.say(say_type)
 
 @bot.command()
-async def base(pokemon: str):
-    base = getJSON(pokeapi + "pokemon/" + pokemon.strip().lower())
+async def pokemon(pokemon: str):
+    pokemon = getJSON(pokeapi + "pokemon/" + pokemon.strip().lower())
+    if pokemon:
+        say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n<" + pokemon['sprites']['front_default'] + ">\n"
+        
+        # TYPES
+        say_pokemon += "Type `" + "`, ".join([item['type']['name'] for item in pokemon['types']]) + "\n"
 
-    say_base = "**BASE STATS: " + base["name"].upper() + "**\n\n"
+        # BASE STATS
+        for item in base["stats"]:
+            if item['stat']['name'] == 'hp':
+                hp = repr(item["base_stat"])
+            if item['stat']['name'] == 'attack':
+                attack = repr(item["base_stat"])
+            if item['stat']['name'] == 'defense':
+                defense = repr(item["base_stat"])
+            if item['stat']['name'] == 'special-attack':
+                sp_attack = repr(item["base_stat"])
+            if item['stat']['name'] == 'special-defense':
+                sp_defense = repr(item["base_stat"])
+            if item['stat']['name'] == 'speed':
+                speed = repr(item["base_stat"])
 
-    for item in base["stats"]:
-        if item['stat']['name'] == 'hp':
-            hp = repr(item["base_stat"])
-        if item['stat']['name'] == 'attack':
-            attack = repr(item["base_stat"])
-        if item['stat']['name'] == 'defense':
-            defense = repr(item["base_stat"])
-        if item['stat']['name'] == 'special-attack':
-            sp_attack = repr(item["base_stat"])
-        if item['stat']['name'] == 'special-defense':
-            sp_defense = repr(item["base_stat"])
-        if item['stat']['name'] == 'speed':
-            speed = repr(item["base_stat"])
+        say_pokemon += "**BASE STATS:**  HP: `" + hp + "`   |   " + \
+            "Atk: `" + attack + "`   |   " + \
+            "Def: `" + defense + "`   |   " + \
+            "SpAtk: `" + sp_attack + "`   |   " + \
+            "SpDef: `" + sp_defense + "`   |   " + \
+            "Spd: `" + speed + "`"
+    
+    else: 
+        say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
 
-    say_base += "HP: `" + hp + "`   |   " + \
-        "Atk: `" + attack + "`   |   " + \
-        "Def: `" + defense + "`   |   " + \
-        "SpAtk: `" + sp_attack + "`   |   " + \
-        "SpDef: `" + sp_defense + "`   |   " + \
-        "Spd: `" + speed + "`"
-
-    await bot.say(say_base)
+    await bot.say(say_pokemon)
 
 
 bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
