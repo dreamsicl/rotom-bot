@@ -25,9 +25,10 @@ def getJSON(url):
                                           })
     try: response = urllib.request.urlopen(req)
     except urllib.request.HTTPError as e:
-        print(e.code)
-        print(e.read())
-        return False
+        if int(e.code()) >= 500:
+            return "щ(`Д´щ;) I can't reach the databazzze! Try again later..."
+        if e.code() is "404":
+            return "I couldn't find your request in the databazzze! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
     else:
         data = response.read()
         data = "".join(map(chr, data))
@@ -107,7 +108,7 @@ async def move(*, name: str):
     name = name.strip().lower().replace(" ", "-")
     move = getJSON(pokeapi + "move/" + name)
 
-    if move:
+    if move is dict:
         move['name'] = [name['name'] for name in move['names'] if name['language']['name'] == "en"][0]
 
         flavor_text = [text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"][0]
@@ -117,8 +118,8 @@ async def move(*, name: str):
             "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
             "`\n\n__Description:__ `" + flavor_text + "`"
 
-    else: 
-        say_move = "Couldn't' find " + move + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+    else:
+        say_move = move
 
     await bot.say(say_move)
 
@@ -128,7 +129,7 @@ async def type(ttype: str):
 
     ttype = getJSON(pokeapi + "type/" + ttype.strip().lower())
 
-    if ttype:
+    if ttype is dict:
         delimiter = "`, `"
         super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
         weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
@@ -152,7 +153,7 @@ async def type(ttype: str):
             say_type += "No damage to: `" + no_dmg_to + "`\n"
     
     else:
-        say_type = "Couldn't' find " + ttype + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+        say_type = ttype
 
     await bot.say(say_type)
 
@@ -168,12 +169,14 @@ def evo_chain(chain, species):
 @bot.command()
 async def pokemon(name: str):
     pokemon = getJSON(pokeapi + "pokemon/" + name.strip().lower())
-    if pokemon:
+    if pokemon is dict:
         species = getJSON(pokeapi + "pokemon-species/" + name.strip().lower())
+
         genus = [item['genus']for item in species['genera'] if item['language']['name'] == "en"][0]
         flavor_text = [item['flavor_text'] for item in species['flavor_text_entries'] if item['version']['name'] == "alpha-sapphire" and item['language']['name'] == "en"][0]
+        
         say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n" + \
-            "```markdown \n#" + str(pokemon["id"]) + " - The " + genus + " Pokémon\n" + flavor_text + "```"
+            "``` markdown \n#" + str(pokemon["id"]) + " - The " + genus + " Pokémon\n" + flavor_text + "```"
         
 
         # TYPES
@@ -206,14 +209,14 @@ async def pokemon(name: str):
             "Spd: `" + speed + "`"
 
         # EVOLUTION TODO: evolution line, evolution method,
-        evolution = getJSON(species['evolution_chain']['url']))
+        evolution = getJSON(str(species['evolution_chain']['url'])))
         say_pokemon += "**Evolution:** " + evo_chain(evolution, evolution['chain']['species']['name'].capitalize())
 
 
         # TODO: height, weight, abilities,
     
     else: 
-        say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+        say_pokemon = pokemon
 
     # await bot.upload(str(pokemon['sprites']['front_default']))
     await bot.say(say_pokemon)
