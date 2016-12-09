@@ -171,12 +171,12 @@ async def base(pokemon: str):
         if item['stat']['name'] == 'speed':
             speed = repr(item["base_stat"])
 
-    say_base += "__HP:__\t\t\t\t`" + hp + "`\n" + \
-        "__Attack:__\t\t\t`" + attack + "`\n" + \
-        "__Defense:__\t\t\t`" + defense + "`\n" + \
-        "__Special Attack:__\t\t`" + sp_attack + "`\n" + \
-        "__Special Defense:__\t\t`" + sp_defense + "`\n" + \
-        "__Speed:__\t\t\t`" + speed + "`"
+    say_base += "__HP:__ `" + hp + "`   |   " + \
+        "__Attack:__ `" + attack + "`   |   " + \
+        "__Defense:__ `" + defense + "`   |   " + \
+        "__Special Attack:__ `" + sp_attack + "`   |   " + \
+        "__Special Defense:__ `" + sp_defense + "`   |   " + \
+        "__Speed:__ `" + speed + "`"
 
     await bot.say(say_base)
 
