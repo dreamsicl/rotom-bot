@@ -114,12 +114,19 @@ async def move(*, name: str):
     for name in move['names']:
         if name['language']['name'] == "en":
              move_name = name['name']
-    
+             break
     move['name'] = move_name
 
-    sayMove = "```" + move["name"].upper() + "```" + \
-        "Damage Class: `" + move["damage_class"]["name"].upper() + "` Type: `" + move["type"]["name"].upper() + \
-        "`\nPower: `" + repr(move["power"]) + "` PP: `" + repr(move["pp"]) + "` Accuracy: `" + repr(move["accuracy"]) + "`"
+    for text in move['flavor_text_entries']:
+        if text['language']['name'] == "en":
+            flavor_text = text['flavor_text']
+            break
+
+    sayMove = "**" + move["name"].upper() + "**" + \
+        "\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
+        "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
+        "`\n__Description:__ `" + flavor_text + "`"
+
 
     # TODO: support multi-word move names
 
