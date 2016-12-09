@@ -123,12 +123,9 @@ async def move(*, name: str):
             break
 
     sayMove = "**" + move["name"].upper() + "**" + \
-        "\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
+        "\n\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
         "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
-        "`\n__Description:__ `" + flavor_text + "`"
-
-
-    # TODO: support multi-word move names
+        "`\n\n__Description:__ `" + flavor_text + "`"
 
     await bot.say(sayMove)
 
