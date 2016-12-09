@@ -156,6 +156,15 @@ async def type(ttype: str):
 
     await bot.say(say_type)
 
+# recursively get evo chain     
+def evo_chain(chain, species):
+    if chain['evolves_to']:
+        species += " > " + " / ".join([evo[name].capitalize() for evo in chain['evolves_to']])
+        return evo_chain(chain['evolves_to'])
+
+    return species
+
+
 @bot.command()
 async def pokemon(name: str):
     pokemon = getJSON(pokeapi + "pokemon/" + name.strip().lower())
@@ -171,8 +180,8 @@ async def pokemon(name: str):
         say_pokemon += "**Type:**   `" + "`, ".join([item['type']['name'] for item in pokemon['types']]).upper() + "`\n"
 
         # EGG GROUPS / HATCH STEPS
-        say_pokemon += "**Hatch Steps:**   " + repr(species['hatch_counter']*255) + \
-            "   | **Egg Group(s):**   `" + "`, ".join([item['name'] for item in species['egg_groups']]).upper() + "`\n"
+        say_pokemon += "**Egg Group(s):**   `" + "`, ".join([item['name'] for item in species['egg_groups']]).upper() + \
+            "**Steps to Hatch:**   `" + repr(species['hatch_counter']*255) + "`\n"
 
         # BASE STATS
         for item in pokemon["stats"]:
@@ -197,7 +206,8 @@ async def pokemon(name: str):
             "Spd: `" + speed + "`"
 
         # EVOLUTION TODO: evolution line, evolution method,
-        # evolution = getJSON(pokeapi + "evolution-chain/" + pokemon['id']))
+        evolution = getJSON(species['evolution_chain']['url']))
+        say_pokemon += "**Evolution:** " + evo_chain(evolution, evolution['chain']['species']['name'].capitalize())
 
 
         # TODO: height, weight, abilities,
