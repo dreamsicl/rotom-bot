@@ -133,13 +133,13 @@ async def move(*, name: str):
     await bot.say(say_move)
 
 @bot.command()
-async def ttype(ttype: str):
+async def type(ttype: str):
     ttype = ttype.strip().lower()
     ttype = getJSON(pokeapi + "type/" + ttype)
 
     super_on = ",".join([item['name'] for item in ttype['damage_relations']['double_damage_to']]) 
 
-    say_type = "**" + type["name"].upper() + "**" + \
+    say_type = "**" + ttype["name"].upper() + "**" + \
         "\n\n__Super Effective On:__ `" + super_on
 
 
