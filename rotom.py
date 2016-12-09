@@ -158,10 +158,10 @@ async def ttype(ttype: str):
 async def pokemon(pokemon: str):
     pokemon = getJSON(pokeapi + "pokemon/" + pokemon.strip().lower())
     if pokemon:
-        say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n<" + pokemon['sprites']['front_default'] + ">\n"
+        say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n"
         
         # TYPES
-        say_pokemon += "Type `" + "`, ".join([item['type']['name'] for item in pokemon['types']]) + "\n"
+        say_pokemon += "Type: `" + "`, ".join([item['type']['name'] for item in pokemon['types']]) + "`\n"
 
         # BASE STATS
         for item in pokemon["stats"]:
@@ -190,6 +190,7 @@ async def pokemon(pokemon: str):
     else: 
         say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
 
+    await client.send_file(channel, pokemon['sprites']['front_default'])
     await bot.say(say_pokemon)
 
 
