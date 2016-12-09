@@ -17,10 +17,7 @@ client = discord.Client()
 # grab info from pokeapi
 pokeapi = "http://pokeapi.co/api/v2/"
 
-
 def getJSON(url):
-    logging.info("getJSON(): currURL=%s" % url)
-
     # init request to pokeapi, set headers
     req = urllib.request.Request(url,
                                  data=None,
@@ -39,9 +36,7 @@ def getJSON(url):
 
 
 # begin bot commands
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-There are a number of utility commands being showcased here.'''
+description = '''Your trusty RotemDex!'''
 bot = commands.Bot(command_prefix='!', description=description)
 
 
@@ -127,38 +122,44 @@ async def move(*, name: str):
 
     await bot.say(say_move)
 
-@bot.command()
-async def ttype(ttype: str):
 
-    ttype = getJSON(pokeapi + "type/" + ttype.strip().lower())
+@bot.listen()
+async def on_message(message):
 
-    if ttype:
-        delimiter = "`, `"
-        super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
-        weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
-        resist = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_from']])
-        not_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_to']])
-        no_dmg_to = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_to']])
-        no_dmg_from = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_from']])
+    if message.author == client.user:
+        return
 
-        say_type = "**TYPE: " + ttype["name"].upper() + "**\n\n"
-        if super_on:
-            say_type += "Super Effective on: `" + super_on + "`\n"
-        if not_on:
-            say_type += "Not Very Effective on: `" + not_on + "`\n"
-        if resist:
-            say_type += "Resists: `" + resist + "`\n"
-        if weak:
-            say_type += "Weak to: `" + weak + "`\n"
-        if no_dmg_from:
-            say_type += "No damage from: `" + no_dmg_from + "`\n"
-        if no_dmg_to:
-            say_type += "No damage to: `" + no_dmg_to + "`\n"
-    
-    else:
-        say_type = "Couldn't' find " + ttype + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+    if message.content.startswith('!type'):
 
-    await bot.say(say_type)
+        ttype = getJSON(pokeapi + "type/" + message.content.split(' ',1)[1].strip().lower())
+
+        if ttype:
+            delimiter = "`, `"
+            super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
+            weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
+            resist = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_from']])
+            not_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_to']])
+            no_dmg_to = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_to']])
+            no_dmg_from = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_from']])
+
+            say_type = "**TYPE: " + ttype["name"].upper() + "**\n\n"
+            if super_on:
+                say_type += "Super Effective on: `" + super_on + "`\n"
+            if not_on:
+                say_type += "Not Very Effective on: `" + not_on + "`\n"
+            if resist:
+                say_type += "Resists: `" + resist + "`\n"
+            if weak:
+                say_type += "Weak to: `" + weak + "`\n"
+            if no_dmg_from:
+                say_type += "No damage from: `" + no_dmg_from + "`\n"
+            if no_dmg_to:
+                say_type += "No damage to: `" + no_dmg_to + "`\n"
+        
+        else:
+            say_type = "Couldn't' find " + ttype + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+
+        await bot.say(say_type)
 
 @bot.command()
 async def pokemon(pokemon: str):
@@ -196,7 +197,7 @@ async def pokemon(pokemon: str):
     else: 
         say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
 
-    await bot.upload(str(pokemon['sprites']['front_default']))
+    # await bot.upload(str(pokemon['sprites']['front_default']))
     await bot.say(say_pokemon)
 
 
