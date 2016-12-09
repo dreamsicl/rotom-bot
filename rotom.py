@@ -103,7 +103,7 @@ bot = commands.Bot(command_prefix='!', description=description)
 @bot.command()
 async def move(*, name: str):
     """ Pokemon move description """
-    name = name.strip().replace(" ", "-")
+    name = name.strip().lower().replace(" ", "-")
     move = getJSON(pokeapi + "move/" + name)
 
     # remove unnecessary keys for easier debugging
@@ -113,13 +113,13 @@ async def move(*, name: str):
     # pp.pprint(move['names'])
     for name in move['names']:
         if name['language']['name'] == "en":
-             move_name = name['language']['name']
+             move_name = name['name']
     
     move['name'] = move_name
 
-    sayMove = "\`\`\`" + move["name"].upper() + "\`\`\`" + \
-        "Damage Class: " + move["damage_class"]["name"] + "Type: " + move["type"]["name"] + \
-        "\nPower \`" + repr(move["power"]) + "\` PP \`" + repr(move["pp"]) + "\` Accuracy \`" + repr(move["accuracy"]) + "\`"
+    sayMove = "```" + move["name"].upper() + "```" + \
+        "Damage Class: `" + move["damage_class"]["name"].upper() + "` Type: `" + move["type"]["name"].upper() + \
+        "`\nPower: `" + repr(move["power"]) + "` PP: `" + repr(move["pp"]) + "` Accuracy: `" + repr(move["accuracy"]) + "`"
 
     # TODO: support multi-word move names
 
