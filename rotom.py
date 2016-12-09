@@ -117,9 +117,9 @@ async def move(*, name: str):
     
     move['name'] = move_name
     
-    sayMove = "\'\'\'" + move["name"].upper() + "\'\'\'" +
+    sayMove = "```" + move["name"].upper() + "```" +
         "Damage Class: " + move["damage_class"]["name"] + "Type: " + move["type"]["name"] +
-        "\nPower \'" + repr(move["power"]) + "\' PP \'" + repr(move["pp"]) + "\' Accuracy \'" + repr(move["accuracy"]) + "\'"
+        "\nPower `" + repr(move["power"]) + "` PP `" + repr(move["pp"]) + "` Accuracy `" + repr(move["accuracy"]) + "`"
 
     # TODO: support multi-word move names
 
