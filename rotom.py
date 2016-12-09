@@ -110,7 +110,7 @@ async def move(*, name: str):
     # del move["flavor_text_entries"]
     # del move["names"]
 
-    # pp.pprint(move)
+    pp.pprint(move['names'])
     for name in move['names']:
         if name['language']['name'] = "en":
              move_name = name['language']['name']
