@@ -164,7 +164,7 @@ async def pokemon(pokemon: str):
         say_pokemon += "Type `" + "`, ".join([item['type']['name'] for item in pokemon['types']]) + "\n"
 
         # BASE STATS
-        for item in base["stats"]:
+        for item in pokemon["stats"]:
             if item['stat']['name'] == 'hp':
                 hp = repr(item["base_stat"])
             if item['stat']['name'] == 'attack':
@@ -185,7 +185,7 @@ async def pokemon(pokemon: str):
             "SpDef: `" + sp_defense + "`   |   " + \
             "Spd: `" + speed + "`"
 
-        # TODO: abilities, evolution line, evolution method
+        # TODO: height, weight, nickname, abilities, evolution line, evolution method
     
     else: 
         say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
