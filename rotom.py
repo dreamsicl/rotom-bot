@@ -117,17 +117,29 @@ async def move(*, name: str):
              break
     move['name'] = move_name
 
-    for text in move['flavor_text_entries']:
-        if text['language']['name'] == "en":
-            flavor_text = text['flavor_text']
-            break
+    # for text in move['flavor_text_entries']:
+    #     if text['language']['name'] == "en":
+    #         flavor_text = text['flavor_text']
+    #         break
 
-    sayMove = "**" + move["name"].upper() + "**" + \
+    flavor_text = text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"
+
+    say_move = "**" + move["name"].upper() + "**" + \
         "\n\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
         "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
         "`\n\n__Description:__ `" + flavor_text + "`"
 
-    await bot.say(sayMove)
+    await bot.say(say_move)
+
+@bot.command()
+async def move(ttype: str):
+    ttype = ttype.strip().lower()
+    ttype = getJSON(pokeapi + "type/" + ttype)
+
+    super_on = ",".join([item['name'] for item in ttype['damage_relations']['double_damage_to']]) 
+
+    say_type = "**" + type["name"].upper() + "**" + \
+        "\n\n__Super Effective On:__ `" + super_on
 
 
 bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
