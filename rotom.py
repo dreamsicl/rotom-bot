@@ -159,16 +159,20 @@ async def type(ttype: str):
 @bot.command()
 async def pokemon(name: str):
     pokemon = getJSON(pokeapi + "pokemon/" + name.strip().lower())
-    species = getJSON(pokeapi + "pokemon-species/" + name.strip().lower())
     if pokemon:
+        species = getJSON(pokeapi + "pokemon-species/" + name.strip().lower())
         genus = [item['genus']for item in species['genera'] if item['language']['name'] == "en"][0]
         flavor_text = [item['flavor_text'] for item in species['flavor_text_entries'] if item['version']['name'] == "alpha-sapphire" and item['language']['name'] == "en"][0]
         say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n" + \
-            "```markdown #" + str(pokemon["id"]) + " - The " + genus + " Pokemon\n" + flavor_text + "```"
+            "```markdown \n#" + str(pokemon["id"]) + " - The " + genus + " Pokémon\n" + flavor_text + "```"
         
 
         # TYPES
-        say_pokemon += "Type: `" + "`, ".join([item['type']['name'] for item in pokemon['types']]).upper() + "`\n"
+        say_pokemon += "**Type:**   `" + "`, ".join([item['type']['name'] for item in pokemon['types']]).upper() + "`\n"
+
+        # EGG GROUPS / HATCH STEPS
+        say_pokemon += "**Hatch Steps:**   " + repr(species['hatch_counter']*255) + \
+            "   | **Egg Group(s):**   `" + "`, ".join([item['name'] for item in species['egg_groups']]).upper() + "`\n"
 
         # BASE STATS
         for item in pokemon["stats"]:
@@ -185,14 +189,18 @@ async def pokemon(name: str):
             if item['stat']['name'] == 'speed':
                 speed = repr(item["base_stat"])
 
-        say_pokemon += "**BASE STATS:**  HP: `" + hp + "`   |   " + \
+        say_pokemon += "**Base Stats:**  HP: `" + hp + "`   |   " + \
             "Atk: `" + attack + "`   |   " + \
             "Def: `" + defense + "`   |   " + \
             "SpAtk: `" + sp_attack + "`   |   " + \
             "SpDef: `" + sp_defense + "`   |   " + \
             "Spd: `" + speed + "`"
 
-        # TODO: height, weight, nickname, abilities, evolution line, evolution method
+        # EVOLUTION TODO: evolution line, evolution method,
+        # evolution = getJSON(pokeapi + "evolution-chain/" + pokemon['id']))
+
+
+        # TODO: height, weight, abilities,
     
     else: 
         say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
@@ -200,5 +208,5 @@ async def pokemon(name: str):
     # await bot.upload(str(pokemon['sprites']['front_default']))
     await bot.say(say_pokemon)
 
-
+# TODO: abilities, egg group command
 bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
