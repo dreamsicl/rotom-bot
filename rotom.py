@@ -137,17 +137,17 @@ async def ttype(ttype: str):
 
     say_type = "**" + ttype["name"].upper() + "**\n\n"
     if super_on:
-        say_type += "__Super Effective On:__ `" + super_on + "`\n"
-    if resist:
-        say_type += "__Resists:__ `" + resist + "`\n"
+        say_type += "**Super Effective On:** `" + super_on + "`\n"
     if not_on:
-        say_type += "__Not Very Effective On:__ `" + not_on + "`\n"
+        say_type += "**Not Very Effective On:** `" + not_on + "`\n"
+    if resist:
+        say_type += "**Resists:** `" + resist + "`\n"
     if weak:
-        say_type += "__Weak to:__ `" + weak + "`\n"
+        say_type += "**Weak to:** `" + weak + "`\n"
     if no_dmg_from:
-        say_type += "__No damage from:__ `" + no_dmg_from + "`\n"
+        say_type += "**No damage from:** `" + no_dmg_from + "`\n"
     if no_dmg_to:
-        say_type += "__No damage to:__ `" + no_dmg_to + "`\n"
+        say_type += "**No damage to:** `" + no_dmg_to + "`\n"
     
     await bot.say(say_type)
 
