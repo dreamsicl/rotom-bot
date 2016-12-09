@@ -127,10 +127,27 @@ async def ttype(ttype: str):
     ttype = ttype.strip().lower()
     ttype = getJSON(pokeapi + "type/" + ttype)
 
-    super_on = ", ".join([item['name'] for item in ttype['damage_relations']['double_damage_to']]) 
+    delimiter = "`, `"
+    super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
+    weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
+    resist = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_from']])
+    not_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['half_damage_to']])
+    no_dmg_to = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_to']])
+    no_dmg_from = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_from']])
 
-    say_type = "**" + ttype["name"].upper() + "**" + \
-        "\n\n__Super Effective On:__ `" + super_on
+    say_type = "**" + ttype["name"].upper() + "**\n\n"
+    if super_on:
+        say_type += "__Super Effective On:__ `" + super_on + "`\n"
+    if resist:
+        say_type += "__Resists:__ `" + resist + "`\n"
+    if not_on:
+        say_type += "__Not Very Effective On:__ `" + not_on + "`\n"
+    if weak:
+        say_type += "__Weak to:__ `" + weak + "`\n"
+    if no_dmg_from:
+        say_type += "__No damage from:__ `" + no_dmg_from + "`\n"
+    if no_dmg_to:
+        say_type += "__No damage to:__ `" + no_dmg_to + "`\n"
     
     await bot.say(say_type)
 
