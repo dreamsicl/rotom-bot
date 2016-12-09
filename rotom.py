@@ -137,9 +137,9 @@ async def ttype(ttype: str):
 
     say_type = "**TYPE: " + ttype["name"].upper() + "**\n\n"
     if super_on:
-        say_type += "Super Effective On: `" + super_on + "`\n"
+        say_type += "Super Effective on: `" + super_on + "`\n"
     if not_on:
-        say_type += "Not Very Effective On: `" + not_on + "`\n"
+        say_type += "Not Very Effective on: `" + not_on + "`\n"
     if resist:
         say_type += "Resists: `" + resist + "`\n"
     if weak:
@@ -171,12 +171,12 @@ async def base(pokemon: str):
         if item['stat']['name'] == 'speed':
             speed = repr(item["base_stat"])
 
-    say_base += "__HP:__ `" + hp + "`   |   " + \
-        "__Attack:__ `" + attack + "`   |   " + \
-        "__Defense:__ `" + defense + "`   |   " + \
-        "__Special Attack:__ `" + sp_attack + "`   |   " + \
-        "__Special Defense:__ `" + sp_defense + "`   |   " + \
-        "__Speed:__ `" + speed + "`"
+    say_base += "HP: `" + hp + "`   |   " + \
+        "Atk: `" + attack + "`   |   " + \
+        "Def: `" + defense + "`   |   " + \
+        "SpAtk: `" + sp_attack + "`   |   " + \
+        "SpDef: `" + sp_defense + "`   |   " + \
+        "Spd: `" + speed + "`"
 
     await bot.say(say_base)
 
