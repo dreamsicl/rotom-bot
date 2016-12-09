@@ -190,7 +190,7 @@ async def pokemon(pokemon: str):
     else: 
         say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
 
-    await client.send_file(channel, pokemon['sprites']['front_default'])
+    await bot.send_file(channel, pokemon['sprites']['front_default'])
     await bot.say(say_pokemon)
 
 
