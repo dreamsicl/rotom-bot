@@ -157,13 +157,18 @@ async def type(ttype: str):
     await bot.say(say_type)
 
 @bot.command()
-async def pokemon(pokemon: str):
-    pokemon = getJSON(pokeapi + "pokemon/" + pokemon.strip().lower())
+async def pokemon(name: str):
+    pokemon = getJSON(pokeapi + "pokemon/" + name.strip().lower())
+    species = getJSON(pokeapi + "pokemon-species/" + name.strip().lower())
     if pokemon:
-        say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n"
+        genus = [item['genus']for item in species['genera'] if item['language']['name'] == "en"][0]
+        flavor_text = [item['flavor_text'] for item in species['flavor_text_entries'] if item['version']['name'] == "alpha-sapphire" and item['language']['name'] == "en"][0]
+        say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n" + \
+            "```markdown #" + str(pokemon["id"]) + " - The " + genus + " Pokemon\n" + flavor_text + "```"
         
+
         # TYPES
-        say_pokemon += "Type: `" + "`, ".join([item['type']['name'] for item in pokemon['types']]) + "`\n"
+        say_pokemon += "Type: `" + "`, ".join([item['type']['name'] for item in pokemon['types']]).upper() + "`\n"
 
         # BASE STATS
         for item in pokemon["stats"]:
