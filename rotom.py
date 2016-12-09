@@ -159,17 +159,17 @@ async def base(pokemon: str):
 
     for item in base["stats"]:
         if item['stat']['name'] == 'hp':
-            hp = item["base_stat"] 
+            hp = repr(item["base_stat"])
         if item['stat']['name'] == 'attack':
-            attack = item["base_stat"] 
+            attack = repr(item["base_stat"])
         if item['stat']['name'] == 'defense':
-            defense = item["base_stat"] 
+            defense = repr(item["base_stat"])
         if item['stat']['name'] == 'special-attack':
-            sp_attack = item["base_stat"] 
+            sp_attack = repr(item["base_stat"])
         if item['stat']['name'] == 'special-defense':
-            sp_defense = item["base_stat"] 
+            sp_defense = repr(item["base_stat"])
         if item['stat']['name'] == 'speed':
-            speed = item["base_stat"] 
+            speed = repr(item["base_stat"])
 
     say_base += "__HP:__\t\t\t`" + hp + "\n" + \
         "__Attack:__\t\t\t`" + attack + "\n" + \
