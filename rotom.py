@@ -25,9 +25,9 @@ def getJSON(url):
                                           })
     try: response = urllib.request.urlopen(req)
     except urllib.request.HTTPError as e:
-        if e.code() >= 500:
+        if e.code >= 500:
             return "щ(`Д´щ;) I can't reach the databazzze! Try again later..."
-        if e.code() >= 400 and e.code() < 500:
+        if e.code >= 400 and e.code < 500:
             return "I couldn't find your request in the databazzze! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
     else:
         data = response.read()
