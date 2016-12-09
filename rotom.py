@@ -12,6 +12,8 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
+client = discord.Client()
+
 # grab info from pokeapi
 pokeapi = "http://pokeapi.co/api/v2/"
 
@@ -24,12 +26,16 @@ def getJSON(url):
                                  data=None,
                                  headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
                                           })
-    response = urllib.request.urlopen(req)
-
-    data = response.read()
-    data = "".join(map(chr, data))
-    data = json.loads(data)
-    return data
+    try: response = urllib.request.urlopen(req)
+    except urllib.request.HTTPerror as e:
+        print(e.code)
+        print(e.read())
+        return False
+    else:
+        data = response.read()
+        data = "".join(map(chr, data))
+        data = json.loads(data)
+        return data
 
 
 # begin bot commands
