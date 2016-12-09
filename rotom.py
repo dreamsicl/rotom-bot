@@ -184,6 +184,8 @@ async def pokemon(pokemon: str):
             "SpAtk: `" + sp_attack + "`   |   " + \
             "SpDef: `" + sp_defense + "`   |   " + \
             "Spd: `" + speed + "`"
+
+        # TODO: abilities, evolution line, evolution method
     
     else: 
         say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
