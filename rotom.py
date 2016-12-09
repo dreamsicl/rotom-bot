@@ -137,17 +137,17 @@ async def ttype(ttype: str):
 
     say_type = "**TYPE: " + ttype["name"].upper() + "**\n\n"
     if super_on:
-        say_type += "**Super Effective On:** `" + super_on + "`\n"
+        say_type += "Super Effective On: `" + super_on + "`\n"
     if not_on:
-        say_type += "**Not Very Effective On:** `" + not_on + "`\n"
+        say_type += "Not Very Effective On: `" + not_on + "`\n"
     if resist:
-        say_type += "**Resists:** `" + resist + "`\n"
+        say_type += "Resists: `" + resist + "`\n"
     if weak:
-        say_type += "**Weak to:** `" + weak + "`\n"
+        say_type += "Weak to: `" + weak + "`\n"
     if no_dmg_from:
-        say_type += "**No damage from:** `" + no_dmg_from + "`\n"
+        say_type += "No damage from: `" + no_dmg_from + "`\n"
     if no_dmg_to:
-        say_type += "**No damage to:** `" + no_dmg_to + "`\n"
+        say_type += "No damage to: `" + no_dmg_to + "`\n"
     
     await bot.say(say_type)
 
@@ -160,6 +160,23 @@ async def base(pokemon: str):
     for item in base["stats"]:
         if item['stat']['name'] == 'hp':
             hp = item["base_stat"] 
+        if item['stat']['name'] == 'attack':
+            attack = item["base_stat"] 
+        if item['stat']['name'] == 'defense':
+            defense = item["base_stat"] 
+        if item['stat']['name'] == 'special-attack':
+            sp_attack = item["base_stat"] 
+        if item['stat']['name'] == 'special-defense':
+            sp_defense = item["base_stat"] 
+        if item['stat']['name'] == 'speed':
+            speed = item["base_stat"] 
+
+    say_base += "__HP:__\t\t\t`" + hp + "\n" + \
+        "__Attack:__\t\t\t`" + attack + "\n" + \
+        "__Defense:__\t\t\t`" + defense + "\n" + \
+        "__Special Attack:__\t\t\t`" + sp_attack + "\n" + \
+        "__Special Defense:__\t\t\t`" + sp_defense + "\n" + \
+        "__Speed:__\t\t\t`" + speed
 
     await bot.say(say_base)
 
