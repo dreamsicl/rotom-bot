@@ -16,7 +16,7 @@ client = discord.Client()
 
 # grab info from pokeapi
 pokeapi = "http://pokeapi.co/api/v2/"
-
+fetching = "Fetching your request. Hang tight!"
 def getJSON(url):
     # init request to pokeapi, set headers
     req = urllib.request.Request(url,
@@ -37,21 +37,48 @@ def getJSON(url):
 
 
 # begin bot commands
-description = '''Your trusty RotemDex!'''
+description = "```Your trusty RotemDex!```"
 bot = commands.Bot(command_prefix='!', description=description)
 
 
 @bot.event
 async def on_ready():
-    print('Logged in as')
-    print(bot.user.name)
+    print('Logged in as', bot.user.name)
     print(bot.user.id)
     print('------')
 
 
+@bot.event
+async def on_command(command, ctx):
+
+    bot.commands_used[command.name] += 1
+    message = ctx.message
+    destination = None
+    if message.channel.is_private:
+        destination = 'Private Message'
+    else:
+        destination = '#{0.channel.name} ({0.server.name})'.format(message)
+    log.info('{0.timestamp}: {0.author.name} in {1}: {0.content}'.format(message, destination))
+
+@bot.event
+async def on_command_error(error, ctx):
+    if isinstance(error, commands.NoPrivateMessage):
+        await bot.send_message(ctx.message.author, 'This command cannot be used in private messages.')
+    elif isinstance(error, commands.DisabledCommand):
+        await bot.send_message(ctx.message.author, 'Sorry. This command is disabled and cannot be used.')
+    elif isinstance(error, commands.CommandInvokeError):
+        print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
+
+        traceback.print_tb(error.original.__traceback__)
+
+        print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
+    elif isinstance(error, commands.TooManyArguments):
+        await bot.say("You sent too many arguments!")
+
 @bot.command()
 async def move(*, name: str):
     """ Pokemon move description """
+    # bot.say(fetching)
     name = name.strip().lower().replace(" ", "-")
     move = getJSON(pokeapi + "move/" + name)
 
@@ -73,8 +100,9 @@ async def move(*, name: str):
 
 @bot.command()
 async def type(ttype: str):
-
+    bot.say("")
     ttype = getJSON(pokeapi + "type/" + ttype.strip().lower())
+    logging.debug(ttype)
 
     if ttype is dict:
         delimiter = "`, `"
