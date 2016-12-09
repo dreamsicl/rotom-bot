@@ -196,7 +196,7 @@ async def pokemon(pokemon: str):
     else: 
         say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
 
-    await bot.upload(pokemon['sprites']['front_default'])
+    await bot.upload(str(pokemon['sprites']['front_default']))
     await bot.say(say_pokemon)
 
 
