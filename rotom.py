@@ -206,10 +206,10 @@ async def pokemon(name: str):
             "Def: `" + defense + "`   |   " + \
             "SpAtk: `" + sp_attack + "`   |   " + \
             "SpDef: `" + sp_defense + "`   |   " + \
-            "Spd: `" + speed + "`"
+            "Spd: `" + speed + "`\n"
 
         # EVOLUTION TODO: evolution line, evolution method,
-        evolution = getJSON(str(species['evolution_chain']['url'])))
+        evolution = getJSON(species['evolution_chain']['url'])
         say_pokemon += "**Evolution:** " + evo_chain(evolution, evolution['chain']['species']['name'].capitalize())
 
 
