@@ -27,7 +27,7 @@ def getJSON(url):
     except urllib.request.HTTPError as e:
         if int(e.code()) >= 500:
             return "щ(`Д´щ;) I can't reach the databazzze! Try again later..."
-        if e.code() is "404":
+        if int(e.code()) >= 400 and int(e.code()) < 500:
             return "I couldn't find your request in the databazzze! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
     else:
         data = response.read()
@@ -176,7 +176,7 @@ async def pokemon(name: str):
         flavor_text = [item['flavor_text'] for item in species['flavor_text_entries'] if item['version']['name'] == "alpha-sapphire" and item['language']['name'] == "en"][0]
         
         say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n" + \
-            "``` markdown \n#" + str(pokemon["id"]) + " - The " + genus + " Pokémon\n" + flavor_text + "```"
+            "``` markdown \n#" + str(pokemon["id"]) + " - The " + genus + " Pokémon\n" + flavor_text + "```\n"
         
 
         # TYPES
