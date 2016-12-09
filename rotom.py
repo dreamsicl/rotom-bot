@@ -133,7 +133,7 @@ async def move(*, name: str):
     await bot.say(say_move)
 
 @bot.command()
-async def type(ttype: str):
+async def ttype(ttype: str):
     ttype = ttype.strip().lower()
     ttype = getJSON(pokeapi + "type/" + ttype)
 
