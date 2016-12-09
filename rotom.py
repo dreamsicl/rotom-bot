@@ -122,7 +122,8 @@ async def move(*, name: str):
     #         flavor_text = text['flavor_text']
     #         break
 
-    flavor_text = text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"
+    flavor_text = [text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"]
+    flavor_text = flavor_text[0]
 
     say_move = "**" + move["name"].upper() + "**" + \
         "\n\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
@@ -132,7 +133,7 @@ async def move(*, name: str):
     await bot.say(say_move)
 
 @bot.command()
-async def move(ttype: str):
+async def type(ttype: str):
     ttype = ttype.strip().lower()
     ttype = getJSON(pokeapi + "type/" + ttype)
 
