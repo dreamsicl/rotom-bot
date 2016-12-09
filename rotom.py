@@ -158,7 +158,8 @@ async def base(pokemon: str):
     say_base = "**BASE STATS: " + base["name"].upper() + "**\n\n"
 
     for item in base["stats"]:
-        hp = item["base_stat"] if item['stat']['name'] == 'hp'
+        if item['stat']['name'] == 'hp':
+            hp = item["base_stat"] 
 
     await bot.say(say_base)
 
