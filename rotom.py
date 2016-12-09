@@ -115,7 +115,7 @@ async def move(*, name: str):
 
     flavor_text = [text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"][0]
 
-    say_move = "**" + move["name"].upper() + "**" + \
+    say_move = "**MOVE: " + move["name"].upper() + "**" + \
         "\n\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
         "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
         "`\n\n__Description:__ `" + flavor_text + "`"
@@ -135,7 +135,7 @@ async def ttype(ttype: str):
     no_dmg_to = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_to']])
     no_dmg_from = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['no_damage_from']])
 
-    say_type = "**" + ttype["name"].upper() + "**\n\n"
+    say_type = "**TYPE: " + ttype["name"].upper() + "**\n\n"
     if super_on:
         say_type += "**Super Effective On:** `" + super_on + "`\n"
     if not_on:
@@ -150,6 +150,17 @@ async def ttype(ttype: str):
         say_type += "**No damage to:** `" + no_dmg_to + "`\n"
     
     await bot.say(say_type)
+
+@bot.command()
+async def base(pokemon: str):
+    base = getJSON(pokeapi + "pokemon/" + pokemon.strip().lower())
+
+    say_base = "**BASE STATS: " + base["name"].upper() + "**\n\n"
+
+    for item in base["stats"]:
+        hp = item["base_stat"] if item['stat']['name'] == 'hp'
+
+    await bot.say(say_base)
 
 
 bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
