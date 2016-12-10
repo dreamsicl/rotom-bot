@@ -79,6 +79,33 @@ async def on_ready():
     print('------')
 
 
+@bot.event
+async def on_command(command, ctx):
+
+    bot.commands_used[command.name] += 1
+    message = ctx.message
+    destination = None
+    if message.channel.is_private:
+        destination = 'Private Message'
+    else:
+        destination = '#{0.channel.name} ({0.server.name})'.format(message)
+    log.info('{0.timestamp}: {0.author.name} in {1}: {0.content}'.format(message, destination))
+
+@bot.event
+async def on_command_error(error, ctx):
+    if isinstance(error, commands.NoPrivateMessage):
+        await bot.send_message(ctx.message.author, 'This command cannot be used in private messages.')
+    elif isinstance(error, commands.DisabledCommand):
+        await bot.send_message(ctx.message.author, 'Sorry. This command is disabled and cannot be used.')
+    elif isinstance(error, commands.CommandInvokeError):
+        print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
+
+        traceback.print_tb(error.original.__traceback__)
+
+        print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
+    elif isinstance(error, commands.TooManyArguments):
+        await bot.say("You sent too many arguments!")
+
 @bot.command()
 async def move(*, move_name: str):
     """ Move description. Includes type, power, pp, and more. """
@@ -94,7 +121,6 @@ async def move(*, move_name: str):
             "\n\n__Type:__ `" + mv["damage_class"]["name"].upper() + "`, `" + mv["type"]["name"].upper() + \
             "`\n__Power:__ `" + repr(mv["power"]) + "`\t__PP:__ `" + repr(mv["pp"]) + "`\t__Accuracy:__ `" + repr(mv["accuracy"]) + "`\t__Priority:__ `" + repr(mv['priority']) + \
             "`\n\n__Description:__ `" + flavor_text + "`"
-
     else: 
         say_move = say_error(mv, titlecaps(move_name))
 
@@ -169,14 +195,19 @@ async def pokemon(pokemon_name: str):
             if item['stat']['name'] == 'speed':
                 speed = repr(item["base_stat"])
 
-        say_pokemon += "**BASE STATS:**  HP: `" + hp + "`   |   " + \
+        say_pokemon += "**Base Stats:**  HP: `" + hp + "`   |   " + \
             "Atk: `" + attack + "`   |   " + \
             "Def: `" + defense + "`   |   " + \
             "SpAtk: `" + sp_attack + "`   |   " + \
             "SpDef: `" + sp_defense + "`   |   " + \
             "Spd: `" + speed + "`\n"
 
-        # TODO: height, weight, nickname, abilities, evolution line, evolution method
+        # EVOLUTION TODO: evolution line, evolution method,
+        # evolution = getJSON(species['evolution_chain']['url'])
+        # say_pokemon += "**Evolution:** " + evo_chain(evolution, evolution['chain']['species']['name'].capitalize())
+
+
+        # TODO: height, weight, abilities,
     
     else: 
         say_pokemon = say_error(pkmn, pokemon_name)
@@ -184,7 +215,7 @@ async def pokemon(pokemon_name: str):
     # await bot.upload(str(pkmn['sprites']['front_default']))
     await bot.say(say_pokemon)
 
-
+# TODO: abilities, egg group command
 bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
 bot.logout()
 bot.close()
