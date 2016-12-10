@@ -14,8 +14,9 @@ logger.addHandler(handler)
 
 client = discord.Client()
 
-# grab info from pokeapi
+# helpers
 pokeapi = "http://pokeapi.co/api/v2/"
+pp = pprint.PrettyPrinter(indent=4)
 
 def getJSON(url):
     # init request to pokeapi, set headers
@@ -25,110 +26,87 @@ def getJSON(url):
                                           })
     try: response = urllib.request.urlopen(req)
     except urllib.request.HTTPError as e:
-        print(e.code)
-        print(e.read())
-        return False
+        print(e.code, e.reason)
+        return e.code
+    except urllib.request.URLError as e:
+        print(e.reason)
+        return 0
     else:
         data = response.read()
         data = "".join(map(chr, data))
         data = json.loads(data)
         return data
 
+# http error 
+def say_error(code: int, name: str):
+    if code > 400 and code < 500:
+        return "I couldn't' find **" + name.capitalize() + "** in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Pleazzze try again..."
+    elif code >= 500:
+        return "I can't reach the databazzze right now. Try again later...'"
+
+# parse error
+def isnumber(thing):
+    try: 
+        float(thing)
+        return True
+    except Exception:
+        return False
+
+# capitalize all words in a string
+def titlecaps(words: str):
+    return " ".join([word.capitalize() for word in words.split()])
+
+# all of an individual pkmn's abilities
+def list_abilities(abilities: list):
+    ablt = []
+    ability_str = ""
+    for ability in abilities:
+        print(ability)
+        ability_str = titlecaps(ability['ability']['name'].replace("-", " "))
+        if ability['is_hidden']:
+            ability_str += " (HA)"
+        ablt.append(ability_str)
+    return ablt
 
 # begin bot commands
 description = '''Your trusty RotemDex!'''
-bot = commands.Bot(command_prefix='!', description=description)
+bot = commands.Bot(command_prefix='!', description=description, help_attrs=dict(hidden=True))
 
-
-# @bot.event
-# async def on_ready():
-#     print('Logged in as')
-#     print(bot.user.name)
-#     print(bot.user.id)
-#     print('------')
-
-
-# @bot.command()
-# async def add(left: int, right: int):
-#     """Adds two numbers together."""
-#     await bot.say(left + right)
-
-
-# @bot.command()
-# async def roll(dice: str):
-#     """Rolls a dice in NdN format."""
-#     try:
-#         rolls, limit = map(int, dice.split('d'))
-#     except Exception:
-#         await bot.say('Format has to be in NdN!')
-#         return
-
-#     result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
-#     await bot.say(result)
-
-
-# @bot.command(description='For when you wanna settle the score some other way')
-# async def choose(*choices: str):
-#     """Chooses between multiple choices."""
-#     await bot.say(random.choice(choices))
-
-
-# @bot.command()
-# async def repeat(times: int, content='repeating...'):
-#     """Repeats a message multiple times."""
-#     for i in range(times):
-#         await bot.say(content)
-
-
-# @bot.command()
-# async def joined(member: discord.Member):
-#     """Says when a member joined."""
-#     await bot.say('{0.name} joined in {0.joined_at}'.format(member))
-
-
-# @bot.group(pass_context=True)
-# async def cool(ctx):
-#     """Says if a user is cool.
-#     In reality this just checks if a subcommand is being invoked.
-#     """
-#     if ctx.invoked_subcommand is None:
-#         await bot.say('No, {0.subcommand_passed} is not cool'.format(ctx))
-
-
-# @cool.command(name='bot')
-# async def _bot():
-#     """Is the bot cool?"""
-#     await bot.say('Yes, the bot is cool.')
+@bot.event
+async def on_ready():
+    print('Logged in as', bot.user.name)
+    print(bot.user.id)
+    print('------')
 
 
 @bot.command()
-async def move(*, name: str):
-    """ Pokemon move description """
-    name = name.strip().lower().replace(" ", "-")
-    move = getJSON(pokeapi + "move/" + name)
+async def move(*, move_name: str):
+    """ Move description. Includes type, power, pp, and more. """
+    move_name = move_name.strip().lower().replace(" ", "-")
+    mv = getJSON(pokeapi + "move/" + move_name)
 
-    if move:
-        move['name'] = [name['name'] for name in move['names'] if name['language']['name'] == "en"][0]
+    if not isnumber(mv):
+        mv['name'] = [name['name'] for name in mv['names'] if name['language']['name'] == "en"][0]
 
-        flavor_text = [text['flavor_text'] for text in move['flavor_text_entries'] if text['language']['name'] == "en"][0]
+        flavor_text = [text['flavor_text'] for text in mv['flavor_text_entries'] if text['language']['name'] == "en"][0]
 
-        say_move = "**MOVE: " + move["name"].upper() + "**" + \
-            "\n\n__Type:__ `" + move["damage_class"]["name"].upper() + "`, `" + move["type"]["name"].upper() + \
-            "`\n__Power:__ `" + repr(move["power"]) + "`\t__PP:__ `" + repr(move["pp"]) + "`\t__Accuracy:__ `" + repr(move["accuracy"]) + "`\t__Priority:__ `" + repr(move['priority']) + \
+        say_move = "**MOVE: " + mv["name"].upper() + "**" + \
+            "\n\n__Type:__ `" + mv["damage_class"]["name"].upper() + "`, `" + mv["type"]["name"].upper() + \
+            "`\n__Power:__ `" + repr(mv["power"]) + "`\t__PP:__ `" + repr(mv["pp"]) + "`\t__Accuracy:__ `" + repr(mv["accuracy"]) + "`\t__Priority:__ `" + repr(mv['priority']) + \
             "`\n\n__Description:__ `" + flavor_text + "`"
 
     else: 
-        say_move = "Couldn't' find " + move + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+        say_move = say_error(mv, titlecaps(move_name))
 
     await bot.say(say_move)
 
 
 @bot.command()
-async def type(ttype: str):
+async def type(type_name: str):
+    """ Type effectiveness info. """
+    ttype = getJSON(pokeapi + "type/" + type_name.strip().lower())
 
-    ttype = getJSON(pokeapi + "type/" + ttype.strip().lower())
-
-    if ttype:
+    if not isnumber(ttype):
         delimiter = "`, `"
         super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
         weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
@@ -152,21 +130,32 @@ async def type(ttype: str):
             say_type += "No damage to: `" + no_dmg_to + "`\n"
     
     else:
-        say_type = "Couldn't' find " + ttype + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+        say_type = say_error(ttype, type_name)
 
     await bot.say(say_type)
 
-@bot.command()
-async def pokemon(pokemon: str):
-    pokemon = getJSON(pokeapi + "pokemon/" + pokemon.strip().lower())
-    if pokemon:
-        say_pokemon = "**POKEMON: " + pokemon["name"].upper() + "**\n"
+@bot.command(aliases=["pkmn"])
+async def pokemon(pokemon_name: str):
+    """ Pokedex entry. Includes base stats, breeding info, abilities, and more."""
+    pkmn = getJSON(pokeapi + "pokemon/" + pokemon_name.strip().lower())
+    if not isnumber(pkmn):
+        species = getJSON(pokeapi + "pokemon-species/" + pkmn['name'])
+
+        genus = [item['genus'] for item in species['genera'] if item['language']['name'] == "en"][0]
+        flavor_text = [item['flavor_text'] for item in species['flavor_text_entries'] if item['language']['name'] == "en"][0]
+
+        say_pokemon = "**POKEMON: " + pkmn["name"].upper() + "**" + \
+            "```markdown\n#" + repr(pkmn['id']) + " - The " + genus + " Pokemon\n" + flavor_text + "```\n"
+
         
-        # TYPES
-        say_pokemon += "Type: `" + "`, ".join([item['type']['name'] for item in pokemon['types']]) + "`\n"
+        # TYPES / ABILITIES
+        say_pokemon += "**Type:** `" + "`, `".join([item['type']['name'].capitalize() for item in pkmn['types']]) + "`   |   " + \
+            "**Abilities:** `" + "`, `".join(list_abilities(pkmn['abilities'])) + "`\n\n"
+
+        # TODO: BREEDING INFO: gender ratio, egg group, hatch steps
 
         # BASE STATS
-        for item in pokemon["stats"]:
+        for item in pkmn["stats"]:
             if item['stat']['name'] == 'hp':
                 hp = repr(item["base_stat"])
             if item['stat']['name'] == 'attack':
@@ -185,15 +174,17 @@ async def pokemon(pokemon: str):
             "Def: `" + defense + "`   |   " + \
             "SpAtk: `" + sp_attack + "`   |   " + \
             "SpDef: `" + sp_defense + "`   |   " + \
-            "Spd: `" + speed + "`"
+            "Spd: `" + speed + "`\n"
 
         # TODO: height, weight, nickname, abilities, evolution line, evolution method
     
     else: 
-        say_pokemon = "Couldn't' find " + pokemon + " in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Please try again... "
+        say_pokemon = say_error(pkmn, pokemon_name)
 
-    # await bot.upload(str(pokemon['sprites']['front_default']))
+    # await bot.upload(str(pkmn['sprites']['front_default']))
     await bot.say(say_pokemon)
 
 
 bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
+bot.logout()
+bot.close()
