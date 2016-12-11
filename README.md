@@ -1,6 +1,6 @@
 # rotom-bot
 
-a discord chat bot built on discord.py. uses pokeapi.co to fetch info for commands:
+a discord chat bot built on [discord.py](https://github.com/Rapptz/discord.py). uses [pokeapi.co](http://pokeapi.co) to fetch info for commands:
 
 * `!type {name}`: type effectiveness
 * `!pokemon {name}`: relevent information about pokemon
