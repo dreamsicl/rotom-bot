@@ -27,11 +27,6 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-
-# @bot.event
-# def on_command(message):
-#     bot.type()
-    
     
 
 @bot.event
@@ -54,7 +49,7 @@ async def on_command_error(error, ctx):
 @bot.command()
 async def move(*, move_name: str):
     """ Move description. Includes type, power, pp, and more. """    
-    await bot.say(fetching(move_name))
+    await bot.type()
     mv = getJSONFromPokeapi(pokeapi + "move/" + move_name.strip().lower().replace(" ", "-"))
 
     if isinstance(mv,dict):
@@ -69,12 +64,13 @@ async def move(*, move_name: str):
     else: 
         say_move = say_error(mv, titlecaps(move_name))
 
-    await bot.edit_message(say_move)
+    await bot.say(say_move)
 
 
 @bot.command()
 async def type(type_name: str):
     """ Type effectiveness info. """
+    await bot.type()
     ttype = getJSONFromPokeapi(pokeapi + "type/" + type_name.strip().lower())
 
     if isinstance(ttype, dict):
@@ -103,11 +99,12 @@ async def type(type_name: str):
     else:
         say_type = say_error(ttype, type_name)
 
-    await bot.edit_message(say_type)
+    await bot.say(say_type)
 
 @bot.command(aliases=["pkmn"])
 async def pokemon(pokemon_name: str):
     """ Pokedex entry. Includes base stats, breeding info, abilities, etc."""
+    await bot.type()
     pkmn = getJSONFromPokeapi(pokeapi + "pokemon/" + pokemon_name.strip().lower())
     if isinstance(pkmn,dict):
         species = getJSONFromPokeapi(pokeapi + "pokemon-species/" + pkmn['name'])
@@ -167,6 +164,7 @@ async def pokemon(pokemon_name: str):
 @bot.command()
 async def ability(*, ability_name: str):
     """ Ability description and Pokemon who have it."""
+    await bot.type()
     abil = getJSONFromPokeapi(pokeapi + "ability/" + ability_name)
 
     if isinstance(abil, dict):
@@ -185,17 +183,9 @@ async def ability(*, ability_name: str):
     await bot.say(say_abil)
 
 # run bot
-# if __name__ == '__main__':
 with open("credentials.json") as f:
     token = json.load(f)['token']
 bot.commands_used = Counter()
 bot.run(token)
 bot.logout()
 bot.close()
-# loop = asyncio.get_event_loop()
-# try:
-#     loop.run_until_complete()
-# except Exception:
-#     loop.run_until_complete(bot.logout())
-# finally:
-#     loop.close()
