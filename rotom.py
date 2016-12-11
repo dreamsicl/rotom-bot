@@ -26,8 +26,11 @@ async def on_ready():
     print('Logged in as', bot.user.name)
     print(bot.user.id)
     print('------')
+    await bot.change_presence(game=discord.Game(name='!help'))
 
-    
+@bot.event
+async def on_command(command,ctx):
+    await bot.add_reaction(ctx.message, "\u1F5F2")
 
 @bot.event
 async def on_command_error(error, ctx):
