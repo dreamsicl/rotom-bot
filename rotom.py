@@ -183,9 +183,7 @@ async def ability(*, ability_name: str):
     await bot.say(say_abil)
 
 # run bot
-with open("credentials.json") as f:
-    token = json.load(f)['token']
 bot.commands_used = Counter()
-bot.run(token)
+bot.run("MjQ5MjUyNDkzMDg1NzY5NzI4.Cy8nBA.Pz4vZLHzZyC99GnB8LArLziGL8k")
 bot.logout()
 bot.close()
