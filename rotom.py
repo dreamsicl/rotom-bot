@@ -1,10 +1,14 @@
 import discord
 from discord.ext import commands
-import random
-import urllib.request
-import json
 import pprint
 import logging
+import sys
+import traceback
+import asyncio
+from collections import Counter
+
+with open("utils.py") as f:
+    exec(f.read())
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -12,64 +16,9 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-client = discord.Client()
-
-# helpers
 pokeapi = "http://pokeapi.co/api/v2/"
-pp = pprint.PrettyPrinter(indent=4)
 
-def getJSON(url):
-    # init request to pokeapi, set headers
-    req = urllib.request.Request(url,
-                                 data=None,
-                                 headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
-                                          })
-    try: response = urllib.request.urlopen(req)
-    except urllib.request.HTTPError as e:
-        print(e.code, e.reason)
-        return e.code
-    except urllib.request.URLError as e:
-        print(e.reason)
-        return 0
-    else:
-        data = response.read()
-        data = "".join(map(chr, data))
-        data = json.loads(data)
-        return data
-
-# http error 
-def say_error(code: int, name: str):
-    if code > 400 and code < 500:
-        return "I couldn't' find **" + name.capitalize() + "** in the database! (ू˃̣̣̣̣̣̣︿˂̣̣̣̣̣̣ ) Pleazzze try again..."
-    elif code >= 500:
-        return "I can't reach the databazzze right now. Try again later...'"
-
-# parse error
-def isnumber(thing):
-    try: 
-        float(thing)
-        return True
-    except Exception:
-        return False
-
-# capitalize all words in a string
-def titlecaps(words: str):
-    return " ".join([word.capitalize() for word in words.split()])
-
-# all of an individual pkmn's abilities
-def list_abilities(abilities: list):
-    ablt = []
-    ability_str = ""
-    for ability in abilities:
-        print(ability)
-        ability_str = titlecaps(ability['ability']['name'].replace("-", " "))
-        if ability['is_hidden']:
-            ability_str += " (HA)"
-        ablt.append(ability_str)
-    return ablt
-
-# begin bot commands
-description = '''Your trusty RotemDex!'''
+description = '''Your trusty RotomDex!'''
 bot = commands.Bot(command_prefix='!', description=description, help_attrs=dict(hidden=True))
 
 @bot.event
@@ -79,17 +28,11 @@ async def on_ready():
     print('------')
 
 
-@bot.event
-async def on_command(command, ctx):
-
-    bot.commands_used[command.name] += 1
-    message = ctx.message
-    destination = None
-    if message.channel.is_private:
-        destination = 'Private Message'
-    else:
-        destination = '#{0.channel.name} ({0.server.name})'.format(message)
-    log.info('{0.timestamp}: {0.author.name} in {1}: {0.content}'.format(message, destination))
+# @bot.event
+# def on_command(message):
+#     bot.type()
+    
+    
 
 @bot.event
 async def on_command_error(error, ctx):
@@ -106,33 +49,35 @@ async def on_command_error(error, ctx):
     elif isinstance(error, commands.TooManyArguments):
         await bot.say("You sent too many arguments!")
 
+
+
 @bot.command()
 async def move(*, move_name: str):
-    """ Move description. Includes type, power, pp, and more. """
-    move_name = move_name.strip().lower().replace(" ", "-")
-    mv = getJSON(pokeapi + "move/" + move_name)
+    """ Move description. Includes type, power, pp, and more. """    
+    await bot.say(fetching(move_name))
+    mv = getJSONFromPokeapi(pokeapi + "move/" + move_name.strip().lower().replace(" ", "-"))
 
-    if not isnumber(mv):
+    if isinstance(mv,dict):
         mv['name'] = [name['name'] for name in mv['names'] if name['language']['name'] == "en"][0]
 
         flavor_text = [text['flavor_text'] for text in mv['flavor_text_entries'] if text['language']['name'] == "en"][0]
 
-        say_move = "**MOVE: " + mv["name"].upper() + "**" + \
-            "\n\n__Type:__ `" + mv["damage_class"]["name"].upper() + "`, `" + mv["type"]["name"].upper() + \
-            "`\n__Power:__ `" + repr(mv["power"]) + "`\t__PP:__ `" + repr(mv["pp"]) + "`\t__Accuracy:__ `" + repr(mv["accuracy"]) + "`\t__Priority:__ `" + repr(mv['priority']) + \
-            "`\n\n__Description:__ `" + flavor_text + "`"
+        say_move = "**MOVE: " + mv["name"].upper() + "** ```" + flavor_text + "```" + \
+            "\n__Type:__ `" + mv["damage_class"]["name"].upper() + "`, `" + mv["type"]["name"].upper() + \
+            "`\n__Power:__ `" + repr(mv["power"]) + "`\t__PP:__ `" + repr(mv["pp"]) + "`\t__Accuracy:__ `" + repr(mv["accuracy"]) + "`\t__Priority:__ `" + repr(mv['priority']) + "`"
+
     else: 
         say_move = say_error(mv, titlecaps(move_name))
 
-    await bot.say(say_move)
+    await bot.edit_message(say_move)
 
 
 @bot.command()
 async def type(type_name: str):
     """ Type effectiveness info. """
-    ttype = getJSON(pokeapi + "type/" + type_name.strip().lower())
+    ttype = getJSONFromPokeapi(pokeapi + "type/" + type_name.strip().lower())
 
-    if not isnumber(ttype):
+    if isinstance(ttype, dict):
         delimiter = "`, `"
         super_on = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_to']])
         weak = delimiter.join([item['name'].upper() for item in ttype['damage_relations']['double_damage_from']])
@@ -158,27 +103,29 @@ async def type(type_name: str):
     else:
         say_type = say_error(ttype, type_name)
 
-    await bot.say(say_type)
+    await bot.edit_message(say_type)
 
 @bot.command(aliases=["pkmn"])
 async def pokemon(pokemon_name: str):
-    """ Pokedex entry. Includes base stats, breeding info, abilities, and more."""
-    pkmn = getJSON(pokeapi + "pokemon/" + pokemon_name.strip().lower())
-    if not isnumber(pkmn):
-        species = getJSON(pokeapi + "pokemon-species/" + pkmn['name'])
-
+    """ Pokedex entry. Includes base stats, breeding info, abilities, etc."""
+    pkmn = getJSONFromPokeapi(pokeapi + "pokemon/" + pokemon_name.strip().lower())
+    if isinstance(pkmn,dict):
+        species = getJSONFromPokeapi(pokeapi + "pokemon-species/" + pkmn['name'])
+        
         genus = [item['genus'] for item in species['genera'] if item['language']['name'] == "en"][0]
         flavor_text = [item['flavor_text'] for item in species['flavor_text_entries'] if item['language']['name'] == "en"][0]
 
         say_pokemon = "**POKEMON: " + pkmn["name"].upper() + "**" + \
             "```markdown\n#" + repr(pkmn['id']) + " - The " + genus + " Pokemon\n" + flavor_text + "```\n"
 
-        
         # TYPES / ABILITIES
-        say_pokemon += "**Type:** `" + "`, `".join([item['type']['name'].capitalize() for item in pkmn['types']]) + "`   |   " + \
+        say_pokemon += "**Type:** `" + "`, `".join([item['type']['name'].upper() for item in pkmn['types']]) + "`   |   " + \
             "**Abilities:** `" + "`, `".join(list_abilities(pkmn['abilities'])) + "`\n\n"
 
-        # TODO: BREEDING INFO: gender ratio, egg group, hatch steps
+        # BREEDING INFO
+        say_pokemon += "**Gender:** " + gender_str(species['gender_rate']) + "   |   " + \
+            "**Egg Groups:** `" + "`, `".join([item['name'].capitalize() for item in species['egg_groups']]) + "`   |   " + \
+            "**Hatch Steps:** `" + repr(species['hatch_counter']*255) + "`\n\n"
 
         # BASE STATS
         for item in pkmn["stats"]:
@@ -195,6 +142,7 @@ async def pokemon(pokemon_name: str):
             if item['stat']['name'] == 'speed':
                 speed = repr(item["base_stat"])
 
+        # BASE STATS
         say_pokemon += "**Base Stats:**  HP: `" + hp + "`   |   " + \
             "Atk: `" + attack + "`   |   " + \
             "Def: `" + defense + "`   |   " + \
@@ -203,7 +151,7 @@ async def pokemon(pokemon_name: str):
             "Spd: `" + speed + "`\n"
 
         # EVOLUTION TODO: evolution line, evolution method,
-        # evolution = getJSON(species['evolution_chain']['url'])
+        # evolution = getJSONFromPokeapi(species['evolution_chain']['url'])
         # say_pokemon += "**Evolution:** " + evo_chain(evolution, evolution['chain']['species']['name'].capitalize())
 
 
@@ -216,6 +164,38 @@ async def pokemon(pokemon_name: str):
     await bot.say(say_pokemon)
 
 # TODO: abilities, egg group command
-bot.run('MjQ5MjUyNDkzMDg1NzY5NzI4.CxEnMA.5EJhgAM_yeHAmLDvI-676afmYLE')
+@bot.command()
+async def ability(*, ability_name: str):
+    """ Ability description and Pokemon who have it."""
+    abil = getJSONFromPokeapi(pokeapi + "ability/" + ability_name)
+
+    if isinstance(abil, dict):
+        say_abil = "**ABILITY: " + abil['name'].upper() + "**"
+
+        effect_entry = [item['effect'] for item in abil['effect_entries'] if item['language']['name'] == "en"][0]
+        say_abil += "```" + effect_entry + "```\n"
+
+        say_abil += "**Pokemon with " + abil['name'].capitalize() + ":** `" + \
+            "`, `".join(pkmnWithAbilStr(abil['pokemon'])) + "`"
+
+    
+    else:
+        say_abil = say_error(abil, ability_name)
+    
+    await bot.say(say_abil)
+
+# run bot
+# if __name__ == '__main__':
+with open("credentials.json") as f:
+    token = json.load(f)['token']
+bot.commands_used = Counter()
+bot.run(token)
 bot.logout()
 bot.close()
+# loop = asyncio.get_event_loop()
+# try:
+#     loop.run_until_complete()
+# except Exception:
+#     loop.run_until_complete(bot.logout())
+# finally:
+#     loop.close()
